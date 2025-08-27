@@ -1,0 +1,1 @@
+{"root":["./src/App.tsx","./src/Protected.tsx","./src/api.ts","./src/auth.ts","./src/main.tsx","./src/pages/Events.tsx","./src/pages/Login.tsx","./src/pages/Watchers.tsx"],"errors":true,"version":"5.9.2"}
