@@ -9,10 +9,44 @@ A file system monitoring application with a FastAPI backend and React frontend, 
 - **Video metadata extraction using pymediainfo**
 - **Video validation rules with configurable thresholds**
 - **Automatic cleanup** - Events are automatically deleted when watchers are removed
+- **Smart file exclusion** - Automatically delete unwanted files based on pattern matching
 - User authentication and authorization
 - Admin and user roles
 - Web-based dashboard
 - Advanced watcher configuration options
+
+## 🛠️ Project Scripts
+
+The project includes three powerful automation scripts for seamless development and deployment:
+
+### 📦 `install.sh` - Complete Installation
+- **One-command setup** for the entire project
+- **Automatic dependency installation** (Python, Node.js, npm)
+- **Database initialization** and configuration
+- **Environment setup** with `.env` file creation
+- **Git hooks** for code quality
+
+### 🚀 `run.sh` - Production Ready
+- **Start both services** with proper process management
+- **Port validation** and conflict detection
+- **Graceful shutdown** with Ctrl+C
+- **Logging system** for monitoring and debugging
+
+### 🔧 `dev.sh` - Development Workflow
+- **Flexible service control** (start individual or both services)
+- **Real-time monitoring** and status checking
+- **Log viewing** and process management
+- **Cleanup utilities** for maintenance
+
+**Quick Start:**
+```bash
+chmod +x install.sh run.sh dev.sh
+./install.sh    # First time setup
+./run.sh        # Start application
+./dev.sh help   # View all options
+```
+
+For complete script documentation, see [SCRIPTS_README.md](SCRIPTS_README.md).
 
 ## Watcher Configuration Options
 
@@ -30,6 +64,7 @@ Each watcher can be configured with the following options:
   - File Deleted
 - **Include Patterns**: File patterns to include (e.g., `*.txt`, `*.log`, `*.py`)
 - **Exclude Patterns**: File patterns to exclude (e.g., `*.tmp`, `*.bak`)
+- **Auto-delete Excluded**: Automatically delete excluded files after placement (prevents unwanted file accumulation)
 
 ### Video Metadata Configuration
 - **Extract Video Metadata**: Enable/disable video metadata extraction
@@ -76,7 +111,9 @@ Each watcher can be configured with the following options:
 The application automatically detects and extracts metadata from:
 - **MP4, AVI, MKV, MOV, WMV, FLV, WebM, M4V, 3GP, TS**
 
-## Setup Instructions
+## 🚀 Quick Setup with Scripts
+
+The project includes comprehensive automation scripts for easy setup and management.
 
 ### Prerequisites
 
@@ -100,7 +137,38 @@ brew install mediainfo
 **Windows:**
 Download from [MediaInfo website](https://mediaarea.net/en/MediaInfo/Download)
 
-### Backend Setup
+### Automated Setup (Recommended)
+
+1. **Make scripts executable:**
+```bash
+chmod +x install.sh run.sh dev.sh
+```
+
+2. **Run the installation script:**
+```bash
+./install.sh
+```
+
+This script will:
+- ✅ Check system requirements
+- ✅ Install Node.js if needed
+- ✅ Create Python virtual environment
+- ✅ Install all dependencies
+- ✅ Initialize database
+- ✅ Build frontend
+- ✅ Create environment configuration
+- ✅ Set up Git hooks
+
+3. **Start the application:**
+```bash
+./run.sh
+```
+
+### Manual Setup (Alternative)
+
+If you prefer manual setup or encounter issues with the automated scripts:
+
+#### Backend Setup
 
 1. Navigate to the backend directory:
 ```bash
@@ -131,14 +199,14 @@ python create_admin_simple.py admin mypassword admin@example.com
 
 5. Start the backend server:
 ```bash
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+uvicorn app.main:app --reload --host 127.0.0.1 --port 8976
 ```
 
 The backend will be available at:
-- API: http://localhost:8001
-- Documentation: http://localhost:8001/docs
+- API: http://127.0.0.1:8976
+- Documentation: http://127.0.0.1:8976/docs
 
-### Frontend Setup
+#### Frontend Setup
 
 1. Navigate to the frontend directory:
 ```bash
@@ -157,14 +225,36 @@ npm run dev
 
 The frontend will be available at http://localhost:5173
 
-### Quick Start
+### Development Workflow
 
-You can run both services simultaneously using the provided script:
+For development, use the flexible development script:
 
 ```bash
-chmod +x start.sh
-./start.sh
+# Start both services
+./dev.sh both
+
+# Start only backend
+./dev.sh backend
+
+# Start only frontend
+./dev.sh frontend
+
+# View logs
+./dev.sh logs
+
+# Check service status
+./dev.sh status
+
+# Stop all services
+./dev.sh stop
+
+# Clean up temporary files
+./dev.sh clean
 ```
+
+### Script Documentation
+
+For detailed information about all available scripts, see [SCRIPTS_README.md](SCRIPTS_README.md).
 
 ## Usage
 
@@ -296,12 +386,19 @@ The frontend is built with:
 
 ## Troubleshooting
 
+### Script Issues
+1. **Permission denied**: Run `chmod +x install.sh run.sh dev.sh`
+2. **Script not found**: Ensure you're in the project root directory
+3. **Installation fails**: Check system requirements (Python 3.8+, Node.js 16+)
+4. **Port conflicts**: Scripts automatically detect and report port conflicts
+5. **Service won't start**: Use `./dev.sh logs` to view detailed error logs
+
 ### General Issues
-1. **Database issues**: Delete `watcher.db` and recreate the admin user
-2. **Port conflicts**: Change the port in the startup commands
-3. **CORS issues**: Check that the frontend URL is allowed in the backend CORS settings
-4. **Path not found**: Ensure the directory path exists and is accessible
-5. **No events showing**: Check that the watcher is started and the path is valid
+6. **Database issues**: Delete `watcher.db` and recreate the admin user
+7. **Port conflicts**: Change the port in the startup commands or `.env` file
+8. **CORS issues**: Check that the frontend URL is allowed in the backend CORS settings
+9. **Path not found**: Ensure the directory path exists and is accessible
+10. **No events showing**: Check that the watcher is started and the path is valid
 
 ### Video Metadata Issues
 6. **Video metadata not working**: Ensure MediaInfo is installed and pymediainfo can access it
