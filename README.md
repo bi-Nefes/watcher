@@ -135,8 +135,8 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 The backend will be available at:
-- API: http://localhost:8000
-- Documentation: http://localhost:8000/docs
+- API: http://localhost:8001
+- Documentation: http://localhost:8001/docs
 
 ### Frontend Setup
 
