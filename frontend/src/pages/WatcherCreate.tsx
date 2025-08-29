@@ -7,6 +7,7 @@ type WatcherConfig = {
   include_patterns: string[];
   exclude_patterns: string[];
   event_types: string[];
+  auto_delete_excluded?: boolean;
 };
 
 type ValidationRule = {
@@ -49,7 +50,8 @@ export default function WatcherCreate() {
     recursive: true,
     include_patterns: ['*'],
     exclude_patterns: [],
-    event_types: ['created', 'modified', 'deleted', 'rejected']
+    event_types: ['created', 'modified', 'deleted', 'rejected'],
+    auto_delete_excluded: true
   });
   const [videoConfig, setVideoConfig] = useState<VideoMetadataConfig>({
     extract_video_metadata: false,
@@ -178,7 +180,7 @@ export default function WatcherCreate() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault(); setError('');
     try {
-      await api.post('/watchers/', {
+              await api.post('/watchers/create', {
         name, path, config,
         video_config: videoConfig.extract_video_metadata ? videoConfig : null
       });
@@ -279,6 +281,22 @@ export default function WatcherCreate() {
                     </div>
                   ))}
                 </div>
+                <div className="form-check mt-2">
+                  <input 
+                    className="form-check-input" 
+                    type="checkbox" 
+                    id="auto_delete_excluded" 
+                    checked={config.auto_delete_excluded !== false} 
+                    onChange={e=>setConfig(prev=>({...prev, auto_delete_excluded: e.target.checked}))} 
+                  />
+                  <label className="form-check-label" htmlFor="auto_delete_excluded">
+                    Automatically delete excluded files after placement
+                  </label>
+                </div>
+                <small className="text-muted">
+                  <strong>Note:</strong> When enabled, excluded files will be automatically deleted after being placed in the watched directory.
+                  This prevents unwanted files from accumulating while maintaining normal file system access.
+                </small>
               </div>
             </div>
           </div>

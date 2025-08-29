@@ -10,6 +10,7 @@ type WatcherConfig = {
   include_patterns: string[];
   exclude_patterns: string[];
   event_types: string[];
+  auto_delete_excluded?: boolean;
 };
 
 type ValidationRule = {
@@ -32,7 +33,7 @@ type VideoMetadataConfig = {
 
 export default function Watchers() {
   const [items, setItems] = useState<Watcher[]>([]);
-  const [running, setRunning] = useState<Record<string, boolean>>({});
+  const [running, setRunning] = useState<Record<number, boolean>>({});
   // creation moved to dedicated page
   const [config, setConfig] = useState<WatcherConfig>({
     recursive: true,

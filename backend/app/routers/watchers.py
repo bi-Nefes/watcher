@@ -1,15 +1,20 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func
+from typing import Dict
 from ..db import get_db, cleanup_orphaned_events, SessionLocal
 from ..models import Watcher, Event
 from ..schemas import WatcherCreate, WatcherOut, WatcherUpdate
 from ..deps import get_current_user, require_admin
 from ..watcher_service import start_watcher, stop_watcher, list_running
+from pydantic import BaseModel, RootModel
 
 router = APIRouter()
 
-@router.post("/", response_model=WatcherOut)
+class RunningWatchersResponse(RootModel[Dict[int, bool]]):
+    pass
+
+@router.post("/create", response_model=WatcherOut)
 def create_watcher(data: WatcherCreate, db: Session = Depends(get_db), _: None = Depends(get_current_user)):
     watcher = Watcher(
         name=data.name, 
@@ -25,6 +30,24 @@ def create_watcher(data: WatcherCreate, db: Session = Depends(get_db), _: None =
 @router.get("/", response_model=list[WatcherOut])
 def list_watchers(db: Session = Depends(get_db), _: None = Depends(get_current_user)):
     return db.query(Watcher).all()
+
+@router.get("/running")
+def running(_: None = Depends(get_current_user)):
+    print(f"🔍 /watchers/running endpoint called - START")
+    try:
+        print(f"🔍 About to call list_running()")
+        result = list_running()
+        print(f"🔍 list_running returned: {result}")
+        print(f"🔍 /watchers/running endpoint called - SUCCESS")
+        return result
+    except Exception as e:
+        print(f"❌ Error in /watchers/running: {e}")
+        print(f"❌ Error type: {type(e)}")
+        import traceback
+        traceback.print_exc()
+        # Return empty dict instead of raising to avoid 422
+        print(f"🔍 Returning empty dict due to error")
+        return {}
 
 @router.get("/{watcher_id}", response_model=WatcherOut)
 def get_watcher(watcher_id: int, db: Session = Depends(get_db), _: None = Depends(get_current_user)):
@@ -93,10 +116,6 @@ def start_w(watcher_id: int, db: Session = Depends(get_db), _: None = Depends(ge
 def stop_w(watcher_id: int, _: None = Depends(get_current_user)):
     ok = stop_watcher(watcher_id)
     return {"stopped": ok}
-
-@router.get("/running")
-def running(_: None = Depends(get_current_user)):
-    return list_running()
 
 @router.post("/cleanup", dependencies=[Depends(require_admin)])
 def cleanup_database():

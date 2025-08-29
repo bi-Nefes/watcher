@@ -9,7 +9,15 @@ app = FastAPI(title="File Watcher API")
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:5174"],
+    allow_origins=[
+        "http://localhost:5173", 
+        "http://localhost:5174",
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:5174",
+        "http://192.168.11.74:5173",
+        "http://192.168.11.74:5174",
+        "http://192.168.11.74:*"  # Allow any port on this IP
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

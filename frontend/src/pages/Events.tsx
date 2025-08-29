@@ -92,7 +92,7 @@ export default function Events() {
                   return (
                     <div key={field} className="col-md-6">
                       <small className="text-muted">
-                        {cleanField.replace('_', ' ')}: <span className="text-dark">{formatMetadataValue(value)}</span>
+                        {cleanField.replace('_', ' ')}: <span className="text-light">{formatMetadataValue(value)}</span>
                       </small>
                     </div>
                   );

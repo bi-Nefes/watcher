@@ -157,6 +157,7 @@ class _Handler(FileSystemEventHandler):
         self.include_patterns = self.config.get('include_patterns', ['*'])
         self.exclude_patterns = self.config.get('exclude_patterns', [])
         self.event_types = self.config.get('event_types', ['created', 'modified', 'deleted'])
+        self.auto_delete_excluded = self.config.get('auto_delete_excluded', True)  # New option
 
     def _should_track_file(self, file_path: str) -> bool:
         """Check if the file should be tracked based on patterns."""
@@ -178,8 +179,23 @@ class _Handler(FileSystemEventHandler):
         """Log an event if it matches the configuration."""
         if event_type not in self.event_types:
             return
-            
-        if not self._should_track_file(file_path):
+        
+        # Check if file should be tracked
+        should_track = self._should_track_file(file_path)
+        
+        # If file is excluded and it's a 'created' event, delete it immediately (if enabled)
+        if not should_track and event_type == 'created' and os.path.exists(file_path) and self.auto_delete_excluded:
+            try:
+                os.remove(file_path)
+                print(f"🗑️  Excluded file {file_path} automatically deleted")
+                # Log the deletion event
+                self._log_deletion_event(file_path, "excluded_auto_delete")
+                return
+            except Exception as e:
+                print(f"❌ Failed to delete excluded file {file_path}: {e}")
+        
+        # If file should not be tracked, don't proceed with normal logging
+        if not should_track:
             return
         
         # Extract video metadata if enabled
@@ -278,6 +294,25 @@ class _Handler(FileSystemEventHandler):
         finally:
             db.close()
 
+    def _log_deletion_event(self, file_path: str, reason: str):
+        """Log when an excluded file is automatically deleted."""
+        try:
+            db: Session = SessionLocal()
+            event = Event(
+                watcher_id=self.watcher_id, 
+                event_type="deleted", 
+                file_path=file_path,
+                video_metadata=None,
+                validation_result={"reason": reason, "auto_deleted": True}
+            )
+            db.add(event)
+            db.commit()
+            print(f"📝 Logged auto-deletion event for {file_path}")
+        except Exception as e:
+            print(f"Error logging auto-deletion event: {e}")
+        finally:
+            db.close()
+
     def on_created(self, event):
         if not event.is_directory:
             self._log("created", event.src_path)
@@ -357,7 +392,11 @@ def cleanup_watcher(watcher_id: int) -> bool:
 
 def list_running() -> Dict[int, bool]:
     """List all running watchers and their status."""
-    return {wid: proc.is_alive() for wid, proc in _running_processes.items()}
+    print(f"🔍 list_running called")
+    print(f"🔍 _running_processes keys: {list(_running_processes.keys())}")
+    result = {wid: proc.is_alive() for wid, proc in _running_processes.items()}
+    print(f"🔍 Returning result: {result}")
+    return result
 
 
 def cleanup_all_watchers() -> None:
