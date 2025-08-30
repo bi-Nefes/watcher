@@ -216,6 +216,35 @@ export default function Events() {
 
   return (
     <div className="container py-4">
+      <style>
+        {`
+          .events-table th:nth-child(1) { width: 80px; }  /* ID */
+          .events-table th:nth-child(2) { width: 100px; } /* Watcher */
+          .events-table th:nth-child(3) { width: 120px; } /* Type */
+          .events-table th:nth-child(4) { width: 180px; } /* Time */
+          .events-table th:nth-child(5) { width: 400px; } /* Path */
+          .events-table th:nth-child(6) { width: 150px; } /* Video Info */
+          .events-table th:nth-child(7) { width: 120px; } /* Validation */
+          .events-table th:nth-child(8) { width: 100px; } /* Actions */
+          
+          .events-table td:nth-child(5) { 
+            max-width: 400px; 
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+          }
+          
+          .copy-path-btn {
+            opacity: 0.7;
+            transition: opacity 0.2s;
+          }
+          
+          .copy-path-btn:hover {
+            opacity: 1;
+          }
+        `}
+      </style>
+      
       <h4>Recent Events</h4>
       
       {/* Debug info removed per request */}
@@ -251,7 +280,8 @@ export default function Events() {
         </div>
       </div>
 
-      <table className="table table-sm">
+      <div className="table-responsive">
+        <table className="table table-sm table-hover events-table">
         <thead>
           <tr>
             <th>ID</th>
@@ -327,8 +357,27 @@ export default function Events() {
                 </span>
               </td>
               <td style={{whiteSpace: 'nowrap'}}>{e.created_at ? new Date(e.created_at).toLocaleString() : '-'}</td>
-              <td className="text-truncate" style={{maxWidth: 250}}>
-                {e.file_path}
+              <td 
+                className="text-break" 
+                style={{
+                  maxWidth: 400,
+                  wordBreak: 'break-all',
+                  fontSize: '0.9em',
+                  fontFamily: 'monospace'
+                }}
+                title={e.file_path}
+              >
+                <div className="d-flex align-items-center">
+                  <span className="flex-grow-1">{e.file_path}</span>
+                  <button
+                    className="btn btn-sm btn-outline-secondary ms-2 copy-path-btn"
+                    onClick={() => navigator.clipboard.writeText(e.file_path)}
+                    title="Copy path to clipboard"
+                    style={{fontSize: '0.8em', padding: '0.25rem 0.5rem'}}
+                  >
+                    📋
+                  </button>
+                </div>
               </td>
               <td>
                 {getVideoInfoDisplay(e)}
@@ -342,7 +391,8 @@ export default function Events() {
             </tr>
           ))}
         </tbody>
-      </table>
+        </table>
+      </div>
 
       {/* Expanded event details */}
       {items.map(e => (
